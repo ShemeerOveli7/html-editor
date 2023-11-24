@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quill Editor with Exit Confirmation</title>
+    <!-- Quill CSS -->
+    <link href="quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="editor-container" style="height: 400px;"></div>
+
+<!-- Quill JS -->
+<script src="quill.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{'color': []}, {'background': []}],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Variable to track whether the content is modified
+        var contentModified = false;
+
+        // Listen for text changes and mark content as modified
+        quill.on('text-change', function(delta, oldDelta, source) {
+            if (source === 'user') {
+                contentModified = true;
+            }
+        });
+
+        // Listen for the beforeunload event to show confirmation message
+        window.addEventListener('beforeunload', function(event) {
+            if (contentModified) {
+                event.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

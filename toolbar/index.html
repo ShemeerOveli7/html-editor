@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quill Editor with Custom Toolbar</title>
+    <!-- Quill CSS -->
+    <link href="quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="toolbar">
+    <span class="ql-formats">
+        <select class="ql-font" defaultValue="arial">
+            <option value="arial">Arial</option>
+            <option value="comic-sans">Comic Sans</option>
+            <option value="courier-new">Courier New</option>
+            <option value="georgia">Georgia</option>
+            <option value="helvetica">Helvetica</option>
+            <option value="lucida">Lucida</option>
+        </select>
+        <select class="ql-size" defaultValue="medium">
+            <option value="extra-small">Size 1</option>
+            <option value="small">Size 2</option>
+            <option value="medium">Size 3</option>
+            <option value="large">Size 4</option>
+        </select>
+        <select class="ql-header" defaultValue="3">
+            <option value="1">Heading</option>
+            <option value="2">Subheading</option>
+            <option value="3">Normal</option>
+        </select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-strike"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-list" value="ordered"></button>
+        <button class="ql-list" value="bullet"></button>
+        <button class="ql-indent" value="-1"></button>
+        <button class="ql-indent" value="+1"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-script" value="super"></button>
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-blockquote"></button>
+        <button class="ql-direction"></button>
+    </span>
+    <span class="ql-formats">
+        <select class="ql-align"></select>
+        <select class="ql-color"></select>
+        <select class="ql-background"></select>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-link"></button>
+        <button class="ql-image"></button>
+        <button class="ql-video"></button>
+    </span>
+    <span class="ql-formats">
+        <button class="ql-formula"></button>
+        <button class="ql-code-block"></button>
+        <button class="ql-clean"></button>
+    </span>
+   <span class="ql-formats">
+    <button class="ql-undo">
+        <svg viewBox="0 0 18 18">
+            <polygon className="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10" />
+            <path className="ql-stroke" d="M8.09,13.91A4.6,4.6,0,0,0,9,14,5,5,0,1,0,4,9" />
+        </svg>
+    </button>
+    <button class="ql-redo">
+        <svg viewBox="0 0 18 18">
+            <polygon className="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10" />
+            <path className="ql-stroke" d="M9.91,13.91A4.6,4.6,0,0,1,9,14a5,5,0,1,1,5-5" />
+        </svg>
+    </button>
+</span>
+
+</div>
+
+<div id="editor-container" style="height: 400px;"></div>
+
+<!-- Quill JS -->
+<script src="quill.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize Quill with a full toolbar
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: {
+                    container: "#toolbar",
+                    handlers: {
+                        undo: undoChange,
+                        redo: redoChange
+                    }
+                },
+                history: {
+                    delay: 500,
+                    maxStack: 100,
+                    userOnly: true
+                }
+            }
+        });
+
+        // Undo and redo functions
+        function undoChange() {
+            quill.history.undo();
+        }
+        function redoChange() {
+            quill.history.redo();
+        }
+    });
+</script>
+
+</body>
+</html>

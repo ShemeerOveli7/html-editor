@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare</title>
+    <!-- Quill CSS -->
+    <link href="quill.snow.css" rel="stylesheet">
+    <style>
+        .unit {
+            width: 30%;
+            float: right;
+        }
+        .editor {
+            height: 375px;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<p> <button onclick="findDiff()">Compare Now</button></p>
+<button onclick="saveImage()">Save Image</button>
+<div class="unit">
+    <h1>Difference</h1>
+    <div id="diff" class="editor"></div>
+</div>
+<div class="unit">
+    <h1>New Version</h1>
+    <div id="new" class="editor"></div>
+</div>
+<div class="unit">
+    <h1>Old Version</h1>
+    <div id="old" class="editor"></div>
+</div>
+
+<!-- Quill JS -->
+<script src="quill.js"></script>
+<script>
+    var quill_old = new Quill('#old', {
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'code-block']
+            ]
+        },
+        placeholder: 'Compose an epic...',
+        theme: 'snow'  // or 'bubble'
+    });
+    var quill_new = new Quill('#new', {
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'code-block']
+            ]
+        },
+        placeholder: 'Compose an epic...',
+        theme: 'snow'  // or 'bubble'
+    });
+    var quill_diff = new Quill('#diff', {
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'code-block']
+            ]
+        },
+        placeholder: 'Compose an epic...',
+        theme: 'snow'  // or 'bubble'
+    });
+
+
+    function saveImage() {
+        // Get the content of the editor
+        var content =quill_old.root.innerHTML;
+
+        // Find the base64 data of the image
+        var matches = content.match(/src="data:image\/([a-zA-Z]+);base64,([^"]+)"/);
+
+        if (matches && matches.length === 3) {
+            var imageType = matches[1];
+            var imageData = matches[2];
+
+            // Convert base64 to a Blob
+            var byteCharacters = atob(imageData);
+            var byteNumbers = new Array(byteCharacters.length);
+
+            for (var i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+
+            var byteArray = new Uint8Array(byteNumbers);
+            var blob = new Blob([byteArray], { type: 'image/' + imageType });
+
+            // Create a link and trigger a download
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'image.' + imageType;
+            a.click();
+        } else {
+            console.error('No image found in the editor.');
+        }
+    }
+
+    function findDiff() {
+        var oldContent = quill_old.getContents();
+        var newContent = quill_new.getContents();
+        var diff = oldContent.diff(newContent);
+
+        for (var i = 0; i < diff.ops.length; i++) {
+            var op = diff.ops[i];
+            if (op.hasOwnProperty('insert')) {
+                op.attributes = {
+                    background: "#cce8cc",
+                    color: "#003700"
+                };
+            }
+            if (op.hasOwnProperty('delete')) {
+                op.retain = op.delete;
+                delete op.delete;
+                op.attributes = {
+                    background: "#e8cccc",
+                    color: "#370000",
+                    strike: true
+                };
+            }
+        }
+
+        var adjusted = oldContent.compose(diff);
+        quill_diff.setContents(adjusted);
+    }
+</script>
+
+</body>
+</html>

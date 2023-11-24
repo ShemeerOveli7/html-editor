@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quill Editor with Auto Save</title>
+    <!-- Quill CSS -->
+    <link href="quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="editor-container" style="height: 400px;"></div>
+
+<!-- Quill JS -->
+<script src="quill.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+                    [{'color': []}, {'background': []}],  // dropdown with defaults from theme
+                    ['clean']                                         // remove formatting button
+                ]
+            }
+        });
+
+        // Load content from local storage if available
+        var savedContent = localStorage.getItem('quill_content');
+        if (savedContent) {
+            quill.clipboard.dangerouslyPasteHTML(savedContent);
+        }
+
+        // Listen for text changes and save to local storage
+        quill.on('text-change', function(delta, oldDelta, source) {
+            if (source === 'user') {
+                var content = quill.root.innerHTML;
+                localStorage.setItem('quill_content', content);
+                console.log('Content saved:', content);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

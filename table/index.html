@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quill Better Table Example</title>
+    <!-- Quill CSS -->
+    <link href="quill.snow.css" rel="stylesheet">
+    <!-- Quill Better Table CSS -->
+    <link href="quill-better-table.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="quillEditor"></div>
+
+<!-- Quill JS -->
+<script src="quill.js"></script>
+<!-- Quill Better Table JS -->
+<script src="quill-better-table.min.js"></script>
+
+<style>
+    .ql-snow .ql-Table-Input .ql-picker-options {
+        padding: 3px 5px;
+        width: 152px;
+    }
+
+    .ql-snow .ql-Table-Input .ql-picker-item {
+        border: 1px solid transparent;
+        float: left;
+        height: 16px;
+        margin: 2px;
+        padding: 0px;
+        width: 16px;
+        background: lightsteelblue;
+    }
+
+    .ql-snow .ql-Table-Input .ql-picker-item:hover, .ql-snow .ql-Table-Input .ql-picker-item.ql-picker-item-highlight {
+        border-color: #000;
+        background: steelblue;
+    }
+
+    .ql-snow .ql-Table-Input.ql-picker {
+        width: 28px;
+    }
+
+    .ql-snow .ql-Table-Input.ql-picker .ql-picker-label {
+        padding: 2px 4px;
+    }
+</style>
+
+<script>
+    Quill.register({
+        'modules/better-table': quillBetterTable
+    }, true);
+
+    var curQuillDiv = document.getElementById("quillEditor");
+
+    var tableOptions = [];
+    var maxRows = 7;
+    var maxCols = 7;
+
+    for (let r = 1; r <= maxRows; r++) {
+        for (let c = 1; c <= maxCols; c++) {
+            tableOptions.push('newtable_' + r + '_' + c);
+        }
+    }
+
+    var toolbarOptions = [
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        [{'color': ["#000000", "#e60000", "#ff9900", "#ffff00", "#008a00", "#0066cc", "#9933ff", "#ffffff", "#facccc", "#ffebcc", "#ffffcc", "#cce8cc", "#cce0f5", "#ebd6ff", "#bbbbbb", "#f06666", "#ffc266", "#ffff66", "#66b966", "#66a3e0", "#c285ff", "#888888", "#a10000", "#b26b00", "#b2b200", "#006100", "#0047b2", "#6b24b2", "#444444", "#5c0000", "#663d00", "#666600", "#003700", "#002966", "#3d1466", 'custom-color']}],
+        ['clean'],
+        [{'Table-Input': tableOptions}]
+    ];
+
+    var curQuill = new Quill(curQuillDiv, {
+        placeholder: 'Compose your text...',
+        theme: 'snow',
+        modules: {
+            toolbar: toolbarOptions,
+            table: false,
+            'better-table': {
+                operationMenu: {
+                    items: {
+                        unmergeCells: {
+                            text: 'Unmerge cells'
+                        }
+                    },
+                    color: {
+                        colors: ['green', 'red', 'yellow', 'blue', 'white'],
+                        text: 'Background Colors:'
+                    }
+                }
+            },
+            keyboard: {
+                bindings: quillBetterTable.keyboardBindings
+            }
+        }
+    });
+
+    var curTableIconSpan = curQuillDiv.parentNode.querySelector('span.ql-Table-Input.ql-picker').childNodes[0];
+    curTableIconSpan.innerHTML = "<svg style=\"right: 4px;\" viewbox=\"0 0 18 18\"> <rect class=ql-stroke height=12 width=12 x=3 y=3></rect> <rect class=ql-fill height=2 width=3 x=5 y=5></rect> <rect class=ql-fill height=2 width=4 x=9 y=5></rect> <g class=\"ql-fill ql-transparent\"> <rect height=2 width=3 x=5 y=8></rect> <rect height=2 width=4 x=9 y=8></rect> <rect height=2 width=3 x=5 y=11></rect> <rect height=2 width=4 x=9 y=11></rect> </g> </svg>";
+    var curTableCellIconSpans = Array.from(curQuillDiv.parentNode.querySelector('span.ql-Table-Input.ql-picker').childNodes[1].children);
+    curTableCellIconSpans.forEach(function(span) {
+        span.addEventListener('click', function() {
+            var curRowIndex = Number(this.dataset.value.substring(9).split('_')[0]);
+            var curColIndex = Number(this.dataset.value.substring(9).split('_')[1]);
+            var curQuillBetterTable = curQuill.getModule('better-table');
+            curQuillBetterTable.insertTable(curRowIndex, curColIndex);
+            // The following two lines have been added, thinking that it would fix the issue of keeping the icon in blue color.
+            // However, Quill keeps adding the classes back, so this fix doesn't work.
+            Array.from(this.parentNode.parentNode.getElementsByClassName("ql-selected")).forEach(function(item) {
+                item.classList.remove("ql-selected");
+            });
+            Array.from(this.parentNode.parentNode.getElementsByClassName("ql-active")).forEach(function(item) {
+                item.classList.remove("ql-active");
+            });
+        });
+        span.addEventListener('mouseenter', function() {
+            var curRowIndex = Number(this.dataset.value.substring(9).split('_')[0]);
+            var curColIndex = Number(this.dataset.value.substring(9).split('_')[1]);
+            Array.from(this.parentNode.children).forEach(function(item) {
+                var curRowIndex1 = curRowIndex;
+                var curColIndex1 = curColIndex;
+                var curRowIndex2 = Number(item.dataset.value.substring(9).split('_')[0]);
+                var curColIndex2 = Number(item.dataset.value.substring(9).split('_')[1]);
+                if (curRowIndex2 <= curRowIndex1 && curColIndex2 <= curColIndex1) {
+                    item.classList.add("ql-picker-item-highlight");
+                }
+            });
+        });
+        span.addEventListener('mouseleave', function() {
+            Array.from(this.parentNode.children).forEach(function(item) {
+                item.classList.remove("ql-picker-item-highlight");
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
